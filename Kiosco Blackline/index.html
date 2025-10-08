@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Blackline - Kiosk</title>
+<meta name="theme-color" content="#000000" />
+<style>
+  :root{
+    --negro:#000; --blanco:#fff; --dorado:#C19756; --borde:#2a2a2a; --radius:18px;
+    --panel:#0b0b0b; --panel2:#101010; --shadow:0 12px 28px rgba(0,0,0,.45);
+    --fs:16px; --ls:0px; --lh:1.5; --weight:500; --scale:1;
+    --gold-grad:linear-gradient(135deg,#E7C58D 0%, #C19756 45%, #a87c3a 100%);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%; background:#000; color:#fff}
+  body{margin:0;font:var(--weight) var(--fs)/var(--lh) system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; letter-spacing:var(--ls)}
+  a{color:var(--dorado);text-decoration:none}
+  img{display:block;max-width:100%}
+  header{position:sticky;top:0;z-index:20;background:rgba(0,0,0,.85);backdrop-filter:blur(6px);
+    display:flex;align-items:center;gap:10px;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #191919}
+  .brand{font-family:Georgia,'Times New Roman',Times,serif;letter-spacing:2px}
+  .brand .big{font-size:26px;font-weight:800;line-height:1}
+  .brand .sub{font-size:12px;color:var(--dorado);letter-spacing:3px;margin-top:2px;display:block}
+  .actions{display:flex;gap:8px;flex-wrap:wrap}
+  .btn-sm{background:#111;border:1px solid #333;color:#fff;border-radius:999px;padding:8px 12px;cursor:pointer}
+  .wrap{max-width:1120px;margin:0 auto;padding:12px 14px 110px}
+  /* Tiles arriba */
+  .tiles{display:grid;gap:12px;grid-template-columns:repeat(2,1fr);margin:12px 0}
+  @media(min-width:720px){.tiles{grid-template-columns:repeat(5,1fr)}}
+  .tile{background:radial-gradient(120% 120% at 10% 10%,#161616 0%,#0d0d0d 60%,#0a0a0a 100%);border:1px solid var(--borde);
+    border-radius:16px;padding:14px;min-height:72px;display:flex;align-items:center;justify-content:center;text-align:center;box-shadow:var(--shadow);cursor:pointer;
+    transition:transform .12s ease, border-color .2s ease}
+  .tile:hover{border-color:#5b431f; transform:translateY(-2px)}
+  .sec{margin:18px 0;border:1px solid var(--borde);border-radius:18px;background:var(--panel);box-shadow:var(--shadow)}
+  .sec h3{margin:0;padding:14px 16px;border-bottom:1px solid #1a1a1a;font-family:Georgia,'Times New Roman',Times,serif;color:#e1bf8d;letter-spacing:.5px}
+  .sec .content{padding:14px 16px}
+  /* Card row (entretenimiento/clima/nosotros) */
+  .cardrow{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+  .info-card{background:linear-gradient(180deg,var(--panel2),#0d0d0d);border:1px solid #202020;border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:8px;box-shadow:var(--shadow)}
+  .info-card .head{display:flex;align-items:center;gap:10px}
+  .ico{width:28px;height:28px;display:grid;place-items:center;border-radius:10px;background:#151515;border:1px solid #2a2a2a;box-shadow:inset 0 0 0 1px #0e0e0e}
+  .title{font-weight:700}
+  .desc{opacity:.85;font-size:14px}
+  .cta{margin-top:auto;display:flex;gap:8px;flex-wrap:wrap}
+  .btn{display:inline-block;background:var(--gold-grad);color:#000;padding:10px 14px;border-radius:999px;font-weight:800;font-size:13px;border:none;cursor:pointer;box-shadow:0 6px 18px rgba(193,151,86,.25)}
+  .btn-outline{display:inline-block;color:#e1bf8d;border:1px solid #a88348;padding:8px 12px;border-radius:999px;font-size:12px;background:transparent}
+  /* Kiosco */
+  #tienda.sec{margin-bottom:100px}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+  .search{flex:1;min-width:220px}
+  .search input{width:100%;padding:12px;border-radius:12px;border:1px solid #2b2b2b;background:#0f0f0f;color:#fff}
+  .cats{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto}
+  .chip{border:1px solid #2b2b2b;border-radius:999px;padding:8px 12px;font-size:12px;cursor:pointer;background:#0f0f0f}
+  .chip.active,.chip:hover{border-color:#a88348;color:#e1bf8d}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(min-width:820px){.grid{grid-template-columns:repeat(3,1fr)}}
+  @media(min-width:1040px){.grid{grid-template-columns:repeat(4,1fr)}}
+  .card{border:1px solid var(--borde);border-radius:16px;background:linear-gradient(180deg,#101010,#0b0b0b);box-shadow:var(--shadow);display:flex;flex-direction:column}
+  .card .imgbox{background:#0b0b0b;display:flex;align-items:center;justify-content:center;aspect-ratio:1/1;border-bottom:1px solid #1f1f1f;position:relative;overflow:hidden}
+  .card .imgbox img{width:86%;height:86%;object-fit:contain;filter:drop-shadow(0 8px 18px rgba(0,0,0,.55))}
+  .badge{position:absolute;top:8px;left:8px;border:1px solid #7a5a2e;border-radius:999px;padding:4px 8px;font-size:11px;background:rgba(193,151,86,.12);color:#e3c08a}
+  .card .info{padding:12px}
+  .price{color:#e1bf8d;font-weight:800;margin-top:auto}
+  /* Barra inferior: Carrito */
+  .bnav{position:fixed;left:0;right:0;bottom:0;background:rgba(10,10,10,.9);backdrop-filter:blur(6px);border-top:1px solid #1f1f1f;display:flex;justify-content:center;gap:6px;padding:10px;z-index:1200}
+  /* Drawer Carrito */
+  .drawer{position:fixed;right:0;top:0;bottom:0;width:100%;max-width:430px;background:#0b0b0b;border-left:1px solid var(--borde);
+    transform:translateX(100%);transition:transform .25s;z-index:1300;display:flex;flex-direction:column}
+  .drawer.open{transform:translateX(0)}
+  .drawer header{padding:12px;border-bottom:1px solid var(--borde);display:flex;justify-content:space-between;align-items:center}
+  .drawer .items{flex:1;overflow:auto;padding:10px}
+  .item{display:grid;grid-template-columns:60px 1fr auto;gap:10px;align-items:center;border:1px solid #1f1f1f;border-radius:12px;padding:8px;margin-bottom:10px;background:linear-gradient(180deg,#101010,#0d0d0d)}
+  .qty button{width:28px;height:28px;border-radius:8px;border:1px solid #2b2b2b;background:#121212;color:#fff;cursor:pointer}
+  .sum{padding:12px;border-top:1px solid var(--borde);background:#0f0f0f}
+  .row{display:flex;gap:10px;align-items:center;margin:6px 0;flex-wrap:wrap;justify-content:space-between}
+  .input{flex:1;min-width:220px}
+  .input input{width:100%;padding:10px;border-radius:12px;border:1px solid #2b2b2b;background:#111;color:#fff}
+  #qrwrap{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:10px}
+  #qrimg{display:none;width:260px;height:260px;background:#fff;border-radius:12px;padding:6px;object-fit:contain;box-shadow:0 10px 28px rgba(0,0,0,.45)}
+  #paynow{display:none}
+  footer{text-align:center;opacity:.7;font-size:12px;margin:18px 0 96px}
+  .hint{opacity:.75;font-size:12px}
+  /* icons (SVG baseline) */
+  .icon{width:18px;height:18px;display:inline-block;vertical-align:-3px}
+
+  /* ===== Modal de Pago (nuevo) ===== */
+  .modal-dim {position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; align-items:center; justify-content:center; z-index:1400}
+  .modal-dim.open {display:flex}
+  .modal {width:min(520px,92vw); background:#0b0b0b; border:1px solid #2a2a2a; border-radius:18px; box-shadow:0 18px 48px rgba(0,0,0,.55); overflow:hidden}
+  .modal header {display:flex; align-items:center; justify-content:space-between; gap:10px; padding:14px 16px; border-bottom:1px solid #1a1a1a}
+  .modal header .t {font-family:Georgia,'Times New Roman',Times,serif; color:#e1bf8d}
+  .modal .body {padding:16px}
+  .pay-total {font-size:22px; font-weight:800; color:#e1bf8d; text-align:center; margin:6px 0 14px}
+  .qr-wrap {display:flex; flex-direction:column; align-items:center; gap:12px}
+  .qr-wrap img {width:min(320px,72vw); height:min(320px,72vw); object-fit:contain; background:#fff; border-radius:14px; padding:6px; box-shadow:0 12px 30px rgba(0,0,0,.45)}
+  .hint {opacity:.8; font-size:13px; text-align:center}
+  .modal .actions {display:flex; gap:10px; justify-content:center; flex-wrap:wrap; padding:14px 16px; border-top:1px solid #1a1a1a; background:#0f0f0f}
+  .btn-gold {background:linear-gradient(135deg,#E7C58D 0%, #C19756 45%, #a87c3a 100%); color:#000; font-weight:800; border:none; border-radius:999px; padding:10px 14px; cursor:pointer}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><div class="big">BLACKLINE</div><span class="sub">TRANSFERS</span></div>
+  <div class="actions">
+    <button class="btn-sm" onclick="toggleFull()">Pantalla completa</button>
+    <button class="btn-sm" onclick="scrollToId('ajustes')">Ajustes</button>
+  </div>
+  <div id="clock">--:--</div>
+</header>
+
+<div class="wrap">
+  <!-- Secciones ARRIBA -->
+  <div class="tiles" role="navigation" aria-label="Secciones">
+    <div class="tile" onclick="scrollToId('entretenimiento')">Entretenimiento</div>
+    <div class="tile" onclick="scrollToId('viaje')">Clima y Viaje</div>
+    <div class="tile" onclick="scrollToId('nosotros')">Nosotros</div>
+    <div class="tile" onclick="scrollToId('ajustes')">Ajustes</div>
+    <div class="tile" onclick="scrollToId('tienda')">Ir al Kiosco</div>
+  </div>
+
+  <!-- ENTRENTENIMIENTO -->
+  <section id="entretenimiento" class="sec">
+    <h3>Entretenimiento</h3>
+    <div class="content">
+      <div class="cardrow">
+        <div class="info-card">
+          <div class="head"><div class="ico">🎵</div><div class="title">Spotify</div></div>
+          <div class="desc">Abrí una playlist chill para el viaje.</div>
+          <div class="cta"><a class="btn" target="_blank" rel="noopener" href="https://open.spotify.com/playlist/37i9dQZF1DX4WYpdgoIcn6">Abrir</a></div>
+        </div>
+        <div class="info-card">
+          <div class="head"><div class="ico">▶️</div><div class="title">YouTube Lofi</div></div>
+          <div class="desc">Música lofi para acompañar el traslado.</div>
+          <div class="cta"><a class="btn" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=lofi+hip+hop+radio">Abrir</a></div>
+        </div>
+        <div class="info-card">
+          <div class="head"><div class="ico">🔊</div><div class="title">Audio de ambiente</div></div>
+          <div class="desc">Pegá un enlace de audio (MP3/stream) y controlá el volumen.</div>
+          <div class="cta" style="width:100%">
+            <input id="audioUrl" placeholder="https://.../stream.mp3" style="flex:1;min-width:160px;padding:10px;border-radius:12px;border:1px solid #2b2b2b;background:#111;color:#fff">
+            <button class="btn" onclick="loadAudio()">Cargar</button>
+            <button class="btn" onclick="toggleAudio()">Play/Pause</button>
+          </div>
+          <div class="cta" style="width:100%">
+            <label class="hint">Volumen</label>
+            <input id="vol" type="range" min="0" max="1" step="0.01" oninput="setVolume(this.value)" style="width:100%">
+          </div>
+          <audio id="player" crossorigin="anonymous"></audio>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CLIMA Y VIAJE -->
+  <section id="viaje" class="sec">
+    <h3>Clima y Viaje</h3>
+    <div class="content">
+      <div class="cardrow">
+        <div class="info-card"><div class="head"><div class="ico">☁️</div><div class="title">Clima</div></div><div class="desc">Pronóstico en Meteored (AR).</div><div class="cta"><a class="btn" target="_blank" rel="noopener" href="https://www.meteored.com.ar/">Abrir</a></div></div>
+        <div class="info-card"><div class="head"><div class="ico">🛫</div><div class="title">Vuelos — Ezeiza (SAEZ)</div></div><div class="desc">Seguimiento en FlightAware.</div><div class="cta"><a class="btn" target="_blank" rel="noopener" href="https://es.flightaware.com/live/airport/SAEZ">Abrir</a></div></div>
+        <div class="info-card"><div class="head"><div class="ico">🛬</div><div class="title">Vuelos — Aeroparque (SABE)</div></div><div class="desc">Seguimiento en FlightAware.</div><div class="cta"><a class="btn" target="_blank" rel="noopener" href="https://es.flightaware.com/live/airport/SABE">Abrir</a></div></div>
+        <div class="info-card"><div class="head"><div class="ico">📍</div><div class="title">Google Maps</div></div><div class="desc">Abrí el mapa para la ruta del viaje.</div><div class="cta"><a class="btn" target="_blank" rel="noopener" href="https://maps.google.com">Abrir</a></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- NOSOTROS -->
+  <section id="nosotros" class="sec">
+    <h3>Nosotros</h3>
+    <div class="content">
+      <div class="cardrow">
+        <div class="info-card"><div class="head"><div class="ico">📸</div><div class="title">Instagram</div></div><div class="desc">@blacklinetransfersok</div><div class="cta"><a class="btn" target="_blank" rel="noopener" href="https://instagram.com/blacklinetransfersok">Abrir</a></div></div>
+        <div class="info-card"><div class="head"><div class="ico">💬</div><div class="title">WhatsApp</div></div><div class="desc">+54 221 314 9313</div><div class="cta"><a class="btn" target="_blank" rel="noopener" href="https://wa.me/542213149313">Escribir</a></div></div>
+        <div class="info-card"><div class="head"><div class="ico">✉️</div><div class="title">Email</div></div><div class="desc">blacklinetransfersok@gmail.com</div><div class="cta"><a class="btn" href="mailto:blacklinetransfersok@gmail.com">Enviar</a></div></div>
+        <div class="info-card"><div class="head"><div class="ico">🌐</div><div class="title">Web</div></div><div class="desc">Google Sites oficial</div><div class="cta"><a class="btn" target="_blank" rel="noopener" href="https://sites.google.com/view/blacklinetransfers">Abrir</a></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AJUSTES -->
+  <section id="ajustes" class="sec">
+    <h3>Ajustes</h3>
+    <div class="content">
+      <div class="row"><label style="min-width:160px">Tamaño base (px):</label><div class="input"><input id="fs" type="range" min="12" max="24" step="1" oninput="applySettings()" /></div><span id="fsv" class="hint"></span></div>
+      <div class="row"><label style="min-width:160px">Espaciado letras (px):</label><div class="input"><input id="ls" type="range" min="-1" max="2" step="0.1" oninput="applySettings()" /></div><span id="lsv" class="hint"></span></div>
+      <div class="row"><label style="min-width:160px">Interlineado:</label><div class="input"><input id="lh" type="range" min="1.2" max="1.8" step="0.05" oninput="applySettings()" /></div><span id="lhv" class="hint"></span></div>
+      <div class="row"><label style="min-width:160px">Peso de texto:</label><div class="input"><select id="weight" onchange="applySettings()"><option value="400">Normal (400)</option><option value="500" selected>Medio (500)</option><option value="600">Semibold (600)</option><option value="700">Bold (700)</option></select></div></div>
+      <div class="row"><label style="min-width:160px">Fuente:</label><div class="input"><select id="font" onchange="applySettings()"><option value="system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif" selected>System UI</option><option value="Roboto, system-ui, -apple-system, Segoe UI, Arial, sans-serif">Roboto</option><option value="Arial, system-ui, -apple-system, Segoe UI, sans-serif">Arial</option><option value="Georgia, 'Times New Roman', serif">Serif (Georgia)</option></select></div></div>
+      <div class="row"><label style="min-width:160px">Escala UI:</label><div class="input"><input id="scale" type="range" min="0.9" max="1.2" step="0.01" oninput="applySettings()" /></div><span id="scalev" class="hint"></span></div>
+      <div class="row"><label style="min-width:160px">Contraste secciones:</label><div class="input"><select id="contrast" onchange="applySettings()"><option value="#0b0b0b" selected>Oscuro (default)</option><option value="#111111">Más oscuro</option><option value="#151515">Suave</option></select></div></div>
+      <div class="row"><button class="btn" onclick="toggleFull()">Pantalla completa</button><button class="btn" onclick="toggleWake()">Mantener pantalla activa</button><span id="wakestate" class="hint"></span></div>
+      <div class="row"><label style="min-width:160px">Volumen música (Entretenimiento):</label><div class="input"><input id="vol2" type="range" min="0" max="1" step="0.01" oninput="setVolume(this.value); document.getElementById('vol').value=this.value" /></div></div>
+      <p class="hint">Los cambios se guardan en la tablet (localStorage) y se aplican al abrir la app.</p>
+    </div>
+  </section>
+
+  <!-- KIOSCO -->
+  <section id="tienda" class="sec">
+    <h3>Kiosco</h3>
+    <div class="content">
+      <div class="toolbar">
+        <div class="search"><input id="q" placeholder="Buscar (agua, gaseosa, snack, cerveza...)" oninput="render()" /></div>
+        <div class="cats" id="cats"></div>
+        <button class="btn" onclick="openCart()">Carrito (<span id="cartCount">0</span>)</button>
+      </div>
+      <div class="grid" id="grid"></div>
+    </div>
+  </section>
+
+  <footer>© Blackline Transfers</footer>
+</div>
+
+<div class="bnav"><button class="btn" onclick="openCart()">Abrir carrito · $<span id="fabTotal">0</span></button></div>
+
+<!-- Drawer del carrito -->
+<div class="drawer" id="drawer">
+  <header>
+    <div style="display:flex;align-items:center;gap:10px"><strong>Tu pedido</strong><span class="chip"><span id="cartCount2">0</span> ítems</span></div>
+    <button class="btn" onclick="closeCart()">Cerrar</button>
+  </header>
+  <div class="items" id="items"></div>
+  <div class="sum">
+    <div class="row" style="justify-content:space-between"><span>Subtotal</span><strong>$<span id="sub">0</span></strong></div>
+    <div class="row">
+      <div class="input"><input id="concepto" placeholder="Concepto (ej: BL-001)"></div>
+      <div class="input"><input id="link" placeholder="Link de pago (ej: https://mpago.la/XXXX o ...?amount={monto})"></div>
+    </div>
+    <div class="row">
+      <button class="btn" onclick="generarQR()">Generar QR</button>
+      <button class="btn" onclick="vaciarCarrito()">Vaciar carrito</button>
+      <a id="paynow" class="btn" target="_blank" rel="noopener">Pagar ahora ↗</a>
+    </div>
+    
+      > (o reemplaza <code>{monto}</code>).</small>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Modal de Pago (QR) ===== -->
+<div id="payModalDim" class="modal-dim" onclick="if(event.target===this) closePayModal()">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="payTitle">
+    <header>
+      <div class="t" id="payTitle">Confirmá y pagá</div>
+      <button class="btn-outline" onclick="closePayModal()">Cerrar</button>
+    </header>
+    <div class="body">
+      <div class="pay-total">TOTAL: $<span id="payTotal">0</span></div>
+      <div class="qr-wrap">
+        <!-- cambiá por mi-qr-only.png si querés solo el código -->
+        <img id="payQR" alt="QR de pago" src="assets/mi-qr.png">
+        <div class="hint">Escaneá con Mercado Pago para abonar tu pedido.</div>
+      </div>
+    </div>
+    <div class="actions">
+      <a id="payNowLink" class="btn-gold" target="_blank" rel="noopener">Pagar ahora ↗</a>
+      <button class="btn-outline" onclick="closePayModal()">Listo</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function tick(){const d=new Date(); document.getElementById('clock').textContent=(String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'));}
+setInterval(tick,1000); tick();
+
+function toggleFull(){const doc=document,de=document.documentElement;if(!doc.fullscreenElement&&!doc.webkitFullscreenElement){(de.requestFullscreen||de.webkitRequestFullscreen||de.msRequestFullscreen||de.mozRequestFullScreen).call(de).catch?.(()=>{});}else{(doc.exitFullscreen||doc.webkitExitFullscreen||doc.msExitFullscreen||doc.mozCancelFullScreen).call(doc).catch?.(()=>{});}}
+let wakeLock=null;async function toggleWake(){try{if(!('wakeLock'in navigator)){document.getElementById('wakestate').textContent='Wake Lock no soportado';return;}if(!wakeLock){wakeLock=await navigator.wakeLock.request('screen');wakeLock.addEventListener('release',()=>{document.getElementById('wakestate').textContent='Pantalla activa: OFF';wakeLock=null;});document.getElementById('wakestate').textContent='Pantalla activa: ON';}else{await wakeLock.release();wakeLock=null;document.getElementById('wakestate').textContent='Pantalla activa: OFF';}}catch(e){document.getElementById('wakestate').textContent='No se pudo activar: '+(e.message||e);}}document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&wakeLock){toggleWake();toggleWake();}});
+
+const defaults={fs:16,ls:0,lh:1.5,weight:500,scale:1,font:"system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif",contrast:"#0b0b0b",volume:0.6,audioUrl:""};
+function loadSettings(){try{return JSON.parse(localStorage.getItem('bl_settings')||'null')||{...defaults};}catch{return {...defaults};}}
+function saveSettings(s){localStorage.setItem('bl_settings',JSON.stringify(s));}
+function setVar(name,val){document.documentElement.style.setProperty(name,String(val));}
+function applySettings(){const s=currentSettings();setVar('--fs',s.fs+'px');setVar('--ls',s.ls+'px');setVar('--lh',s.lh);setVar('--weight',s.weight);setVar('--scale',s.scale);setVar('--font',s.font);setVar('--contrast',s.contrast);document.getElementById('fsv').textContent=s.fs+'px';document.getElementById('lsv').textContent=s.ls+'px';document.getElementById('lhv').textContent=s.lh.toFixed(2);document.getElementById('scalev').textContent=s.scale.toFixed(2);document.getElementById('vol').value=s.volume;document.getElementById('vol2').value=s.volume;const player=document.getElementById('player');player.volume=s.volume;saveSettings(s);}
+function currentSettings(){return{fs:Number(document.getElementById('fs').value),ls:Number(document.getElementById('ls').value),lh:Number(document.getElementById('lh').value),weight:Number(document.getElementById('weight').value),scale:Number(document.getElementById('scale').value),font:document.getElementById('font').value,contrast:document.getElementById('contrast').value,volume:Number(document.getElementById('vol2').value||document.getElementById('vol').value||0.6)};}
+function initSettings(){const s=loadSettings();document.getElementById('fs').value=s.fs;document.getElementById('ls').value=s.ls;document.getElementById('lh').value=s.lh;document.getElementById('weight').value=s.weight;document.getElementById('scale').value=s.scale;document.getElementById('font').value=s.font;document.getElementById('contrast').value=s.contrast;document.getElementById('vol').value=s.volume;document.getElementById('vol2').value=s.volume;setVar('--fs',s.fs+'px');setVar('--ls',s.ls+'px');setVar('--lh',s.lh);setVar('--weight',s.weight);setVar('--scale',s.scale);setVar('--font',s.font);setVar('--contrast',s.contrast);if(s.audioUrl){const p=document.getElementById('player');p.src=s.audioUrl;document.getElementById('audioUrl').value=s.audioUrl;p.load();p.volume=s.volume;}}
+function resetSettings(){localStorage.removeItem('bl_settings');initSettings();}
+function setVolume(v){const p=document.getElementById('player');p.volume=Number(v);const s=loadSettings();s.volume=Number(v);saveSettings(s);}
+function loadAudio(){const url=(document.getElementById('audioUrl').value||'').trim();const p=document.getElementById('player');if(!url){alert('Pegá un link de audio válido');return;}p.src=url;p.load();const s=loadSettings();s.audioUrl=url;saveSettings(s);}
+function toggleAudio(){const p=document.getElementById('player');if(p.paused){p.play().catch(()=>{});}else{p.pause();}}
+
+const IMG_BASE='assets/';
+function resolveImg(p){if(!p.img)return'';if(/^https?:|^data:|^\/\//.test(p.img))return p.img;return IMG_BASE+encodeURIComponent(p.img);}
+const PRODUCTS=[
+  {id:'agua500',name:'Agua 500 ml',price:2500,cat:'Bebidas',img:'Agua_Pureza_de_las_Sierras_500ml.png',tag:'Frío'},
+  {id:'coca500',name:'Coca-Cola 500 ml',price:2500,cat:'Gaseosas',img:'Coca_Cola_500ml.png',tag:'Frío'},
+  {id:'brahma473',name:'Cerveza Brahma 473',price:3000,cat:'Cervezas',img:'Cerveza_Brahma_473.png',tag:'Frío'},
+  {id:'quilmes473',name:'Quilmes Clásica 473',price:3000,cat:'Cervezas',img:'Cerveza_Quilmes_Clásica_473.png',tag:'Frío'},
+  {id:'andesipa',name:'Andes IPA 473',price:3500,cat:'Cervezas',img:'Cerveza_Andes_IPA_473.png',tag:'Frío'},
+  {id:'andesroja',name:'Andes Roja 473',price:3500,cat:'Cervezas',img:'Cerveza_Andes_Roja_473.png',tag:'Frío'},
+  {id:'redbull',name:'Red Bull 250 ml',price:3500,cat:'Energéticas',img:'Red_Bull.png',tag:'Frío'},
+  {id:'chandon',name:'Chandon Rosé 375 ml',price:8000,cat:'Espumantes',img:'Chandon_Rose_375.png'},
+  {id:'ferrero3',name:'Ferrero Rocher x3',price:3500,cat:'Chocolates',img:'Ferrero_Rocher_x3.png'},
+  {id:'kitkat',name:'Kit Kat 4 fingers',price:2000,cat:'Chocolates',img:'Kit_Kat.png'},
+  {id:'topline7',name:'Chicles Topline Seven',price:1700,cat:'Chicles',img:'Topline_Seven.png'},
+  {id:'hallsazul',name:'Halls Azul 28 g',price:2000,cat:'Caramelos',img:'Halls_Azul.png'},
+  {id:'hallsverde',name:'Halls Verde 28 g',price:2000,cat:'Caramelos',img:'Halls_Verde.png'},
+  {id:'tic',name:'Tic Tac',price:2000,cat:'Caramelos',img:'Tic_Tac.png'},
+  {id:'ocb',name:'Papelillos OCB X-Pert',price:2000,cat:'Accesorios',img:'OCB_Xpert.png'},
+  {id:'croppers',name:'Maní Croppers Salado 80 g',price:2500,cat:'Snacks',img:'Croppers_Mani_Salado.png'},
+  {id:'lays40',name:"Papas Lay's Clásicas 40 g",price:2500,cat:'Snacks',img:'Lays_Clasicas_40g.png'}
+];
+
+let CART={};
+const dqs=s=>document.querySelector(s),dqsa=s=>document.querySelectorAll(s);
+const grid=dqs('#grid'),catsEl=dqs('#cats'),cartCount=dqs('#cartCount'),cartCount2=dqs('#cartCount2'),itemsEl=dqs('#items'),subEl=dqs('#sub'),qInput=dqs('#q');
+
+function scrollToId(id){document.getElementById(id).scrollIntoView({behavior:'smooth'});}
+function renderCats(){const CATS=['Todos',...Array.from(new Set(PRODUCTS.map(p=>p.cat)))];let current='Todos';catsEl.innerHTML='';CATS.forEach(c=>{const el=document.createElement('button');el.className='chip'+(c===current?' active':'');el.textContent=c;el.onclick=()=>{current=c;render(current);dqsa('.chip').forEach(x=>x.classList.remove('active'));el.classList.add('active');};catsEl.appendChild(el);});}
+renderCats();
+
+function cardTpl(p){const src=resolveImg(p);const badge=p.tag?`<span class="badge">${p.tag}</span>`:'';const safe=(src||'').replace(/"/g,'&quot;');return `<div class="card"><div class="imgbox">${badge}${safe?`<img src="${safe}" alt="${p.name}" onerror="this.onerror=null;this.parentNode.innerHTML='<div style=&quot;color:#777&quot;>Sin imagen</div>'">`:'<div style="color:#777">Sin imagen</div>'}</div><div class="info"><h4 style="margin:0 0 4px">${p.name}</h4><p class="muted" style="opacity:.85;margin:0 0 6px">${p.cat}</p><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div class="price">$${p.price}</div><button class="btn" onclick="add('${p.id}')">Agregar</button></div></div></div>`;}
+function render(cat='Todos'){const q=(qInput?.value||'').toLowerCase().trim();const list=PRODUCTS.filter(p=>(cat==='Todos'||p.cat===cat)&&(!q||p.name.toLowerCase().includes(q)||p.cat.toLowerCase().includes(q)));grid.innerHTML=list.map(cardTpl).join('');}
+render();
+
+function add(id){CART[id]=(CART[id]||0)+1;updateBadges();drawCart();toast('Agregado');}
+function sub(id){if(!CART[id])return;CART[id]--;if(CART[id]<=0)delete CART[id];updateBadges();drawCart();}
+function rm(id){delete CART[id];updateBadges();drawCart();}
+function calc(){let count=0,total=0;for(const id in CART){const p=PRODUCTS.find(x=>x.id===id);if(!p)continue;count+=CART[id];total+=CART[id]*p.price;}return{count,total};}
+function updateBadges(){const {count,total}=calc();if(cartCount)cartCount.textContent=count;if(cartCount2)cartCount2.textContent=count;document.querySelector('#fabTotal').textContent=total;subEl.textContent=total;}
+function openCart(){dqs('#drawer').classList.add('open');drawCart();}
+function closeCart(){dqs('#drawer').classList.remove('open');}
+function vaciarCarrito(){CART={};updateBadges();drawCart();clearQR();}
+function drawCart(){itemsEl.innerHTML='';const {total}=calc();subEl.textContent=total;for(const id in CART){const p=PRODUCTS.find(x=>x.id===id);if(!p)continue;const row=document.createElement('div');row.className='item';row.innerHTML=`
+  <div style="width:60px;height:60px;background:#0a0a0a;border-radius:10px;display:flex;align-items:center;justify-content:center;overflow:hidden">
+    ${resolveImg(p)?`<img src="${resolveImg(p)}" alt="${p.name}" style="width:90%;height:90%;object-fit:contain" onerror="this.onerror=null;this.parentNode.innerHTML='<span style=&quot;font-size:11px;opacity:.7&quot;>Sin img</span>'">`:'<span style="font-size:11px;opacity:.7">Sin img</span>'}
+  </div>
+  <div><div style="font-weight:700">${p.name}</div><div class="muted">$${p.price}</div></div>
+  <div class="qty"><button onclick="sub('${id}')">–</button><div style="min-width:20px;text-align:center">${CART[id]}</div><button onclick="add('${id}')">+</button><button class="btn" style="margin-left:6px" onclick="rm('${id}')">Quitar</button></div>`;itemsEl.appendChild(row);}}
+
+function toast(m){const n=document.createElement('div');n.textContent=m;n.style.position='fixed';n.style.bottom='20px';n.style.left='50%';n.style.transform='translateX(-50%)';n.style.background='rgba(225,191,141,.98)';n.style.color='#000';n.style.padding='8px 14px';n.style.borderRadius='999px';n.style.fontWeight='800';n.style.zIndex='9999';document.body.appendChild(n);setTimeout(()=>n.remove(),1400);}
+
+// === Pago (drawer viejo: QR inline) ===
+function buildPaymentURL(base,total){
+  if(!base) return '';
+  if(base.includes('{monto}')) return base.replace('{monto}', total);
+  const param='amount'; // cambiar por 'value' si lo necesitás
+  if(base.includes('?')) return base+'&'+param+'='+encodeURIComponent(total);
+  return base+'?'+param+'='+encodeURIComponent(total);
+}
+function clearQR(){const img=document.getElementById('qrimg'); img.style.display='none'; img.removeAttribute('src'); const a=document.getElementById('paynow'); a.style.display='none'; a.removeAttribute('href');}
+
+// === Nuevo: Modal premium de pago ===
+function openPayModal(total, url){
+  document.getElementById('payTotal').textContent = total;
+  const qr = document.getElementById('payQR');
+  qr.src = 'assets/mi-qr.png'; // o 'assets/mi-qr-only.png' si preferís solo el código
+  const a = document.getElementById('payNowLink');
+  if (url){ a.href = url; a.style.display='inline-block'; } else { a.removeAttribute('href'); a.style.display='none'; }
+  document.getElementById('payModalDim').classList.add('open');
+}
+function closePayModal(){ document.getElementById('payModalDim').classList.remove('open'); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePayModal(); });
+
+// Reemplazo de generarQR(): abre el modal elegante
+function generarQR(){
+  const {total}=calc();
+  if(total<=0){toast('El carrito está vacío');return;}
+  const link=(document.getElementById('link').value||'').trim();
+  let url = '';
+  if (link) url = buildPaymentURL(link,total);
+  openPayModal(total, url);
+}
+
+// INIT
+function init(){initSettings();}
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
